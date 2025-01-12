@@ -1,0 +1,51 @@
+-- Parent this script to StarterPlayerScripts or StarterCharacterScripts
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Create animations
+local jumpAnim = Instance.new("Animation")
+jumpAnim.AnimationId = "rbxassetid://181076195" -- Jump animation ID
+local jumpAnimTrack = humanoid.Animator:LoadAnimation(jumpAnim)
+
+local walkAnim = Instance.new("Animation")
+walkAnim.AnimationId = "rbxassetid://321225258" -- Walk animation ID
+local walkAnimTrack = humanoid.Animator:LoadAnimation(walkAnim)
+
+local idleAnim = Instance.new("Animation")
+idleAnim.AnimationId = "rbxassetid://243656287" -- Idle animation ID
+local idleAnimTrack = humanoid.Animator:LoadAnimation(idleAnim)
+
+-- Default humanoid walk speed
+local normalWalkSpeed = 16
+local slowWalkSpeed = 8
+
+-- Play animations and adjust speed on movement
+local function move()
+    if humanoid.MoveDirection.Magnitude > 0 then
+        -- Slow down when walking
+        humanoid.WalkSpeed = slowWalkSpeed
+        if not walkAnimTrack.IsPlaying and idleAnimTrack.IsPlaying then
+            idleAnimTrack:Stop()
+            walkAnimTrack:Play()
+        end
+    else
+        -- Restore normal speed and play idle animation
+        humanoid.WalkSpeed = normalWalkSpeed
+        if walkAnimTrack.IsPlaying and not idleAnimTrack.IsPlaying then
+            idleAnimTrack:Play()
+            walkAnimTrack:Stop()
+        end
+    end
+end
+
+-- Trigger jump animation on Jumping
+humanoid.Jumping:Connect(function()
+    jumpAnimTrack:Play()
+end)
+
+-- Update animations and movement speed dynamically
+game:GetService("RunService").RenderStepped:Connect(move)
+
+-- Start with idle animation when the script is first run
+idleAnimTrack:Play()
